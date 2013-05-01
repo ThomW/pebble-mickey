@@ -17,13 +17,11 @@ BmpContainer background_image_container;
 RotBmpPairContainer hour_hand_image_container;
 RotBmpPairContainer minute_hand_image_container;
 
-void set_hand_angle(RotBmpPairContainer *hand_image_container, unsigned int hand_angle) {
-  rotbmp_pair_layer_set_angle(&hand_image_container->layer, TRIG_MAX_ANGLE * hand_angle / 360);
-  layer_mark_dirty(&hand_image_container->layer.layer);
-}
-
 
 void update_display(PblTm* t) {
+
+  // SUPER huge thanks to dansl for sharing the code for his silly-walk watch that made this possible
+  // https://github.com/dansl/pebble-silly-walk/tree/master/silly_walk
 
   hour_hand_image_container.layer.black_layer.rotation = hour_hand_image_container.layer.white_layer.rotation = TRIG_MAX_ANGLE * (((t->tm_hour % 12) * 30) + (t->tm_min / 2)) / 360;
   hour_hand_image_container.layer.layer.frame.origin.x = (144 - hour_hand_image_container.layer.layer.frame.size.w) * 0.5;
@@ -62,12 +60,12 @@ void handle_init(AppContextRef ctx) {
 
   // Set up a layer for the hour hand
   rotbmp_pair_init_container(RESOURCE_ID_IMAGE_HOUR_HAND_WHITE, RESOURCE_ID_IMAGE_HOUR_HAND_BLACK, &hour_hand_image_container);
-  rotbmp_pair_layer_set_src_ic(&hour_hand_image_container.layer, GPoint(8, 49));
+  rotbmp_pair_layer_set_src_ic(&hour_hand_image_container.layer, GPoint(10, 41));
   layer_add_child(&window.layer, &hour_hand_image_container.layer.layer);
 
   // Set up a layer for the minute hand
   rotbmp_pair_init_container(RESOURCE_ID_IMAGE_MINUTE_HAND_WHITE, RESOURCE_ID_IMAGE_MINUTE_HAND_BLACK, &minute_hand_image_container);
-  rotbmp_pair_layer_set_src_ic(&minute_hand_image_container.layer, GPoint(13, 38));
+  rotbmp_pair_layer_set_src_ic(&minute_hand_image_container.layer, GPoint(9, 52));
   layer_add_child(&window.layer, &minute_hand_image_container.layer.layer);
 
   // Avoid a blank screen on watch start
@@ -94,7 +92,7 @@ void pbl_main(void *params) {
     .deinit_handler = &handle_deinit,
     .tick_info = {
       .tick_handler = &handle_minute_tick,
-      .tick_units = SECOND_UNIT
+      .tick_units = MINUTE_UNIT
     }
   };
 
